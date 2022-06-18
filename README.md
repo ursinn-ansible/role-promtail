@@ -1,4 +1,4 @@
-# Ansible Role Promtail
+# Ansible Role - Promtail
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/ursinn/ansible-role-promtail?logo=github&style=for-the-badge)](https://github.com/ursinn/ansible-role-promtail/commits)
 [![License](https://img.shields.io/github/license/ursinn/ansible-role-promtail?style=for-the-badge)](https://github.com/ursinn/ansible-role-promtail/blob/main/LICENSE)
