@@ -13,7 +13,7 @@
 
 - name: Ensure grafana/promtail image is pulled
   community.docker.docker_image:
-    name: docker.io/grafana/promtail:2.4.2
+    name: docker.io/grafana/promtail:2.6.1
     source: pull
     force_source: yes
   register: pulled
