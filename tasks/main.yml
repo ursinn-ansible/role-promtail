@@ -38,7 +38,7 @@
     -v /var/log:/var/log:ro \
     -p 9080:9080 \
     --restart unless-stopped \
-    docker.io/grafana/promtail:2.4.2 \
+    docker.io/grafana/promtail:2.6.1 \
     -config.file=/mnt/config/promtail-config.yaml \
     -config.expand-env=true
   when:
