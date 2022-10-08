@@ -7,9 +7,9 @@
 
 - name: Copy promtail-config file
   ansible.builtin.template:
-    src: promtail-config.yml.j2
-    dest: /opt/system-promtail/config/promtail-config.yml
-    mode: 0664
+    src: promtail-config.yaml.j2
+    dest: /opt/system-promtail/config/promtail-config.yaml
+    mode: 0600
 
 - name: Ensure grafana/promtail image is pulled
   community.docker.docker_image:
