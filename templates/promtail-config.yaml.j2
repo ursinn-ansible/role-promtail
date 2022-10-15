@@ -31,4 +31,5 @@ scrape_configs:
       - localhost
     labels:
       job: docker
+      host: ${HOST}
       __path__: /var/lib/docker/containers/*/*-json.log
