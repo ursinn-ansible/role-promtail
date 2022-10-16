@@ -1,7 +1,7 @@
 ---
 - name: Create promtail config volume
   community.docker.docker_volume:
-    name: app_promtail_config
+    name: promtail_config
 
 - name: Ensure grafana/promtail image is pulled
   community.docker.docker_image:
@@ -28,7 +28,7 @@
      HOST: "{{ ansible_nodename }}"
     image: docker.io/grafana/promtail:2.6.1
     mounts:
-     - source: app_promtail_config
+     - source: promtail_config
        target: /mnt/config
      - read_only: yes
        source: /var/log/
