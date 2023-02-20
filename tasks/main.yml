@@ -5,7 +5,7 @@
 
 - name: Ensure grafana/promtail image is pulled
   community.docker.docker_image:
-    name: docker.io/grafana/promtail:2.6.1
+    name: docker.io/grafana/promtail
     source: pull
     force_source: yes
   register: pulled
@@ -26,7 +26,7 @@
     command: ["-config.file=/mnt/config/promtail-config.yaml", "-config.expand-env=true"]
     env:
      HOST: "{{ ansible_nodename }}"
-    image: docker.io/grafana/promtail:2.6.1
+    image: docker.io/grafana/promtail
     mounts:
      - source: promtail_config
        target: /mnt/config
