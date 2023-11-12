@@ -39,8 +39,8 @@
        target: /var/lib/docker/containers
        type: bind
     name: promtail
-    published_ports:
-     - 9080:9080
+    networks:
+     - name: app-network
     restart_policy: unless-stopped
     state: started
   when:
@@ -80,3 +80,38 @@
     restart: yes
   when:
     result.exists == false
+
+- name: Ensure beevelop/nginx-basic-auth image is pulled
+  community.docker.docker_image:
+    name: docker.io/beevelop/nginx-basic-auth
+    source: pull
+    force_source: yes
+  register: pulled_nginx
+
+- name: Remove nginx container
+  community.docker.docker_container:
+    name: promtail-nginx
+    state: absent
+  when: pulled_nginx.changed
+
+- name: Get infos on nginx container
+  community.docker.docker_container_info:
+    name: promtail-nginx
+  register: result_nginx
+
+- name: Create nginx container
+  community.docker.docker_container:
+    image: docker.io/beevelop/nginx-basic-auth
+    name: promtail-nginx
+    networks:
+     - name: app-network
+    env:
+      FORWARD_HOST: "promtail"
+      FORWARD_PORT: "9080"
+      HTPASSWD: "{{ system_promtail_nginx_htpasswd }}"
+    restart_policy: unless-stopped
+    state: started
+  when:
+    pulled_nginx.changed
+    or
+    result_nginx.exists == false
