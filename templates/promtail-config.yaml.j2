@@ -10,12 +10,6 @@ clients:
     basic_auth:
       username: "{{ system_promtail_loki_username }}"
       password: "{{ system_promtail_loki_password }}"
-{% if system_promtail_loki_url_2 is defined %}
-  - url: {{ system_promtail_loki_url_2 }}
-    basic_auth:
-      username: "{{ system_promtail_loki_username }}"
-      password: "{{ system_promtail_loki_password }}"
-{% endif %}
 
 # System logs
 scrape_configs:
