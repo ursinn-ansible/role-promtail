@@ -5,6 +5,7 @@
     docker_container: '{{ role_promtail_docker_container }}'
     docker_volume: '{{ role_promtail_docker_volume }}'
     docker_network: '{{ role_promtail_docker_network }}'
+    tmp_dir: '{{ role_promtail_tmp_dir }}'
 
 - name: Ensure image is pulled
   community.docker.docker_image:
@@ -24,12 +25,22 @@
     name: "{{ docker_container }}"
   register: result
 
+- name: Create volume
+  community.docker.docker_volume:
+    name: "{{ docker_volume }}"
+
+- name: Create network
+  community.docker.docker_network:
+    name: "{{ docker_network }}"
+    driver_options:
+          com.docker.network.bridge.name: "br-{{ docker_network }}"
+
 - name: Create promtail container
   community.docker.docker_container:
     command: ["-config.file=/mnt/config/promtail-config.yaml", "-config.expand-env=true"]
     env:
      HOST: "{{ ansible_nodename }}"
-    image: "{{ docker_image }}"
+    image: '{{ docker_image }}'
     mounts:
      - source: "{{ docker_volume }}"
        target: /mnt/config
@@ -51,9 +62,9 @@
     or
     result.exists == false
 
-- name: Create tmp promtail directory
+- name: Create tmp directory
   ansible.builtin.file:
-    path: "{{ role_promtail_tmp_dir }}"
+    path: "{{ tmp_dir }}"
     state: directory
   when:
     result.exists == false
@@ -61,23 +72,23 @@
 - name: Copy promtail file
   ansible.builtin.template:
     src: promtail-config.yaml.j2
-    dest: "{{ role_promtail_tmp_dir }}/promtail-config.yaml"
+    dest: "{{ tmp_dir }}/promtail-config.yaml"
   when:
     result.exists == false
 
 - name: Copy config file into promtail container
-  shell: "docker cp {{ role_promtail_tmp_dir }}/promtail-config.yaml {{ docker_container }}:/mnt/config"
+  shell: "docker cp {{ tmp_dir }}/promtail-config.yaml {{ docker_container }}:/mnt/config"
   when:
     result.exists == false
 
-- name: Remove tmp promtail directory
+- name: Remove tmp directory
   ansible.builtin.file:
-    path: "{{ role_promtail_tmp_dir }}"
+    path: "{{ tmp_dir }}"
     state: absent
   when:
     result.exists == false
 
-- name: Restart promtail container
+- name: Restart container
   community.docker.docker_container:
     name: "{{ docker_container }}"
     restart: yes

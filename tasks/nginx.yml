@@ -3,7 +3,6 @@
   set_fact:
     docker_image: '{{ role_promtail_nginx_docker_image }}'
     docker_container: '{{ role_promtail_docker_container }}-nginx'
-    docker_volume: '{{ role_promtail_docker_volume }}-nginx'
     docker_network: '{{ role_promtail_docker_network }}'
 
 - name: Ensure image is pulled
@@ -23,6 +22,12 @@
   community.docker.docker_container_info:
     name: "{{ docker_container }}"
   register: result
+
+- name: Create network
+  community.docker.docker_network:
+    name: "{{ docker_network }}"
+    driver_options:
+          com.docker.network.bridge.name: "br-{{ docker_network }}"
 
 - name: Create container
   community.docker.docker_container:
