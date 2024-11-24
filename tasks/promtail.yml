@@ -3,7 +3,7 @@
   set_fact:
     docker_image: '{{ role_promtail_docker_image }}'
     docker_container: '{{ role_promtail_docker_container }}'
-    docker_volume: '{{ role_promtail_docker_volume }}'
+    docker_volume_config: '{{ role_promtail_docker_volume }}_config'
     docker_network: '{{ role_promtail_docker_network }}'
     tmp_dir: '{{ role_promtail_tmp_dir }}'
 
@@ -25,9 +25,9 @@
     name: "{{ docker_container }}"
   register: result
 
-- name: Create volume
+- name: Create config volume
   community.docker.docker_volume:
-    name: "{{ docker_volume }}"
+    name: "{{ docker_volume_config }}"
 
 - name: Create network
   community.docker.docker_network:
@@ -42,7 +42,7 @@
      HOST: "{{ ansible_nodename }}"
     image: '{{ docker_image }}'
     mounts:
-     - source: "{{ docker_volume }}"
+     - source: "{{ docker_volume_config }}"
        target: /mnt/config
      - read_only: yes
        source: /var/log/
