@@ -1,6 +1,96 @@
 ---
-- name: manage promtail
-  ansible.builtin.include_tasks: promtail.yml
+- name: set vars
+  set_fact:
+    docker_image: '{{ role_promtail_docker_image }}'
+    docker_container: '{{ role_promtail_docker_container }}'
+    docker_volume_config: '{{ role_promtail_docker_volume }}_config'
+    docker_network: '{{ role_promtail_docker_network }}'
+    tmp_dir: '{{ role_promtail_tmp_dir }}'
 
-- name: manage ngnix
-  ansible.builtin.include_tasks: nginx.yml
+- name: Ensure image is pulled
+  community.docker.docker_image:
+    name: "{{ docker_image }}"
+    source: pull
+    force_source: yes
+  register: pulled
+
+- name: Remove container
+  community.docker.docker_container:
+    name: "{{ docker_container }}"
+    state: absent
+  when: pulled.changed
+
+- name: Get infos on container
+  community.docker.docker_container_info:
+    name: "{{ docker_container }}"
+  register: result
+
+- name: Create config volume
+  community.docker.docker_volume:
+    name: "{{ docker_volume_config }}"
+
+- name: Create network
+  community.docker.docker_network:
+    name: "{{ docker_network }}"
+    driver_options:
+          com.docker.network.bridge.name: "br-{{ docker_network }}"
+
+- name: Create promtail container
+  community.docker.docker_container:
+    command: ["-config.file=/mnt/config/promtail-config.yaml", "-config.expand-env=true"]
+    env:
+     HOST: "{{ ansible_nodename }}"
+    image: '{{ docker_image }}'
+    mounts:
+     - source: "{{ docker_volume_config }}"
+       target: /mnt/config
+     - read_only: yes
+       source: /var/log/
+       target: /var/log
+       type: bind
+     - read_only: yes
+       source: /var/lib/docker/containers/
+       target: /var/lib/docker/containers
+       type: bind
+    name: "{{ docker_container }}"
+    networks:
+     - name: "{{ docker_network }}"
+    restart_policy: unless-stopped
+    state: started
+  when:
+    pulled.changed
+    or
+    result.exists == false
+
+- name: Create tmp directory
+  ansible.builtin.file:
+    path: "{{ tmp_dir }}"
+    state: directory
+  when:
+    result.exists == false
+
+- name: Copy promtail file
+  ansible.builtin.template:
+    src: promtail-config.yaml.j2
+    dest: "{{ tmp_dir }}/promtail-config.yaml"
+  when:
+    result.exists == false
+
+- name: Copy config file into promtail container
+  shell: "docker cp {{ tmp_dir }}/promtail-config.yaml {{ docker_container }}:/mnt/config"
+  when:
+    result.exists == false
+
+- name: Remove tmp directory
+  ansible.builtin.file:
+    path: "{{ tmp_dir }}"
+    state: absent
+  when:
+    result.exists == false
+
+- name: Restart container
+  community.docker.docker_container:
+    name: "{{ docker_container }}"
+    restart: yes
+  when:
+    result.exists == false

@@ -14,8 +14,6 @@ Docker Image: https://hub.docker.com/r/grafana/promtail
 | role_promtail_docker_volume | promtail |
 | role_promtail_docker_network | app-network |
 | role_promtail_tmp_dir | /tmp/ansible-role-promtail |
-| role_promtail_nginx_docker_image | docker.io/beevelop/nginx-basic-auth |
-| role_promtail_nginx_htpasswd | |
 | role_promtail_loki_url| |
 | role_promtail_loki_username| |
 | role_promtail_loki_password | |
