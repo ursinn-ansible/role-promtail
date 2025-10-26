@@ -9,7 +9,7 @@ Docker Image: https://hub.docker.com/r/grafana/promtail
 
 | Option | Default Value |
 | ---- | ---- |
-| role_promtail_docker_image | docker.io/grafana/promtail |
+| role_promtail_docker_image | docker.io/grafana/promtail:3.5 |
 | role_promtail_docker_container | promtail |
 | role_promtail_docker_volume | promtail |
 | role_promtail_docker_network | app-network |
